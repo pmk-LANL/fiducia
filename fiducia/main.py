@@ -582,7 +582,14 @@ def feelingLucky(dataFile,
                  area,
                  angle,
                  signalsUncertainty=None,
-                 peaksNum=2):
+                 peaksNum=2,
+                 peakAlignIdx=0,
+                 prominence=0.01,
+                 peakWidth=10,
+                 avgMult=1.5,
+                 timeStart=-1,
+                 timeStop=4,
+                 timeStep=0.1):
     r"""
     Attempt processing dante signals given dante data file and calibration
     files using sensible defaults.
@@ -674,11 +681,11 @@ def feelingLucky(dataFile,
                          df=dfPoly,
                          channels=channels,
                          peaksNum=peaksNum,
-                         peakAlignIdx=0,
+                         peakAlignIdx=peakAlignIdx,
                          referenceTime=1e-9,
-                         prominence=0.01,
-                         width=10,
-                         avgMult=1.5)
+                         prominence=prominence,
+                         width=peakWidth,
+                         avgMult=avgMult)
     
     # constructing dataframe for passing to analyzeStreak()
     measurementFrame = constructMeasurementFrame(timesFrame=timesAligned,
@@ -728,9 +735,6 @@ def feelingLucky(dataFile,
     knotsYAll, knotsYVariance, photonEnergies, intensities, intensitiesVariance = spectrumResults
     
     # unfolding time resolved spectra
-    timeStart = -1
-    timeStop = 4
-    timeStep = 0.1
     streakResults = analyzeStreak(channels,
                                   responseFrame,
                                   knots,
