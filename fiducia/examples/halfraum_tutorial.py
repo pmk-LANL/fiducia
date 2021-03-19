@@ -5,97 +5,100 @@ Hohlraum unfold tutorial
 
 """
 
-
-
 import numpy as np
-import os
-import xarray as xr
-import datetime
-import matplotlib.pyplot as plt
 
-
+from fiducia.data import shot89336
 from fiducia.error import detectorUncertainty
 from fiducia.main import feelingLucky
 
 
-def danteName(shotNum):
-    """
-    Construct name of dante data file, given shot number.
-    """
-    name = 'dante_dante' + str(shotNum) + '.dat'
-    return name
+# load absolute paths to example data
+shot89336Dict = shot89336()
+
+# raw Dante data file 
+danteFileFull = shot89336Dict['Raw Dante']
+
+# corresponding response functions file
+responseFile = shot89336Dict['Response Funcs']
+
+# file of input uncertainties for each channel
+responseUncertaintyFile = shot89336Dict['Response Uncertainty']
+
+# oscilloscope offsets file for calibrating channel signals
+offsetsFile = shot89336Dict['Oscilloscope Offsets']
+
+# oscilloscope attenuators file to correct for addition attenuation
+# on individual channels. Note: that the identification numbers of the
+# attenuators used for an Omega-60 shot should be recorded in the header
+# of the raw Dante data file.
+attenuatorsFile = shot89336Dict['Attenuators']
+
+# # filename for saving spline matrices. This should end with extension .nc
+# csplineDatasetFile = 'csplineDataset.nc'
 
 
-def dantePath(directory, shotNum):
-    """
-    Construct full path name for DANTE file given shot number.
-    """
-    filePath = os.path.join(directory, danteName(shotNum))
-    return filePath
 
+# selecting which channels to include in the analysis
+channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13]
 
-#current ignal data is from 86455
-shotNum = 86455
-# selecting which channels to analyze
-channels = [2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14]
+# input params
+peaksNum = 1
+peakAlignIdx = 0
+prominence = 0.01
+peakWidth = 10
+avgMult = 3
+timeStart = -1
+timeStop = 4
+timeStep = 0.1
 
-# response functions file
-dirResponse = '/home/pkozlowski/LANL_postdoc/codes/python/fiducia/data/calibration/'
-responseFile = 'do170801_2018-03-07_response_functions.csv'
-#responseUncertaintyFile = 'exampleuncertainty_1dper.csv'
-responseUncertaintyFile = 'exampleuncertainty_1d-PMK100.csv'
-
-# DANTE measurement data file(s) (not aligned)
-dirCOAX = '/home/pkozlowski/LANL_postdoc/codes/python/fiducia/data/COAX/86455/'
-
-# directory to partially reduced data provided by Dan (just attenuator correction and bkg subtraction)
-dirDan = '/home/pkozlowski/LANL_postdoc/codes/python/fiducia/data/Dan/'
-
-
-# directory with calibration files for attenuators and offsets on DANTE channels
-dirCal = '/home/pkozlowski/LANL_postdoc/codes/python/fiducia/data/calibration/'
-offsetsFile = 'Offset.xls'
-attenuatorsFile = 'TableAttenuators.xls'
-
-#filenames spline matrices
-csplineDatasetFile = 'csplineDataset.nc'
-
-
-danteFileFull = dantePath(dirCOAX, shotNum)
-
-
-    
-  
-#%% saving uncertainty propagation matrices
+# Selecting which boundary condition to use in the unfold. The y0 condition 
+# sets the low-energy portion of the spectrum as photon energy approaches
+# zero.
 boundary = "y0"
 
-# run error prop and MC
-#detectorUncertainty(channels,
-#                    dirResponse + responseFile,
-#                    dirResponse + responseUncertaintyFile,
-#                    boundary=boundary,
-#                    csplineDatasetFile=csplineDatasetFile)
+# uncertainty propagation using Monte Carlo to obtain covariance
+# terms across the various Dante channels.
+# detectorUncertainty(channels,
+#                     responseFile,
+#                     responseUncertaintyFile,
+#                     boundary=boundary,
+#                     csplineDatasetFile=csplineDatasetFile)
+# For the purposes of this tutorial, we are skipping over this Monte Carlo
+# uncertainties propagation and just giving you the resultant file.
+# Getting path of MC uncertainties file
+csplineDatasetFile = shot89336Dict['MC Uncertainties']
 
 
-# unfolding spectra
-
-#example signal uncertainty.
+# example signal uncertainty.
 signalsUncertainty = np.zeros(len(channels))
 
-area = np.pi * 0.6 ** 2
-# dante viewing angle relative to normal of emitting surface, in degrees 
-#angle = 37.4
-#angle = 69.09
-angle = 69.18
+# Calculate emitting area of plasma. In this case the emission is
+# coming out of the hohlraum laser entrance hole (LEH).
+leh_diameter = 1.200 # mm
+area = np.pi * (leh_diameter / 2) ** 2
+
+# dante viewing angle relative to normal of emitting surface, in degrees.
+# This is used to get the projected emitting area.
+angle = 37.4
+
+# unfolding spectra
 results = feelingLucky(dataFile=danteFileFull,
-                       attenuatorsFile=dirCal + attenuatorsFile,
-                       offsetsFile=dirCal + offsetsFile,
-                       responseFile=dirResponse + responseFile,
+                       attenuatorsFile=attenuatorsFile,
+                       offsetsFile=offsetsFile,
+                       responseFile=responseFile,
                        csplineDatasetFile=csplineDatasetFile, 
                        channels=channels,
                        area=area,
                        angle=angle,
-                       signalsUncertainty=signalsUncertainty)
+                       signalsUncertainty=signalsUncertainty,
+                       peaksNum=peaksNum,
+                       peakAlignIdx=peakAlignIdx,
+                       prominence=prominence,
+                       peakWidth=peakWidth,
+                       avgMult=avgMult,
+                       timeStart=timeStart,
+                       timeStop=timeStop,
+                       timeStep=timeStep)
 
 # unpacking reuslts
 times, energies, spectra, power, tRad = results
