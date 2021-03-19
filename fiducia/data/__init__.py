@@ -51,6 +51,8 @@ def shot89336():
     # attenuators used for an Omega-60 shot should be recorded in the header
     # of the raw Dante data file.
     attenuatorsFileRel = 'data/TableAttenuators.xls'
+    # MC propagated uncertainties
+    csplineDatasetFileRel = 'data/csplineDataset.nc'
     
     # getting absolute paths to data files
     danteFileAbs = _fetch(danteFileRel)
@@ -58,11 +60,13 @@ def shot89336():
     responseUncertaintyFileAbs = _fetch(responseUncertaintyFileRel)
     offsetsFileAbs = _fetch(offsetsFileRel)
     attenuatorsFileAbs = _fetch(attenuatorsFileRel)
+    csplineDatasetFileAbs = _fetch(csplineDatasetFileRel)
     
     # saving absolute paths into a dict
     dataDict = {'Raw Dante' : danteFileAbs,
                 'Response Funcs' : responseFileAbs,
                 'Response Uncertainty' : responseUncertaintyFileAbs,
                 'Oscilloscope Offsets' : offsetsFileAbs,
-                'Attenuators' : attenuatorsFileAbs}
+                'Attenuators' : attenuatorsFileAbs,
+                'MC Uncertainties' : csplineDatasetFileAbs}
     return dataDict
