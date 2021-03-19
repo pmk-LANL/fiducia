@@ -567,7 +567,7 @@ def analyzeStreak(channels,
         energies[:, idt] = photonEnergies
         spectra[:, idt] = intensities
         spectraVariance[:, idt] = intensitiesVariance
-        print(f"Completed time step {time} ns.")    
+        print(f"Completed time step {time:.2f} ns.")    
     # plotting streaked spectrum
     plotStreak(times, energies, spectra)
     return times, energies, spectra, spectraVariance
@@ -582,7 +582,7 @@ def feelingLucky(dataFile,
                  area,
                  angle,
                  signalsUncertainty=None,
-                 peaksNum=2,
+                 peaksNum=1,
                  peakAlignIdx=0,
                  prominence=0.01,
                  peakWidth=10,
@@ -670,9 +670,9 @@ def feelingLucky(dataFile,
                                df=dfAtten,
                                channels=channels,
                                order=5,
-                               prominence=0.2,
-                               width=10,
-                               avgMult=1)
+                               prominence=prominence,
+                               width=peakWidth,
+                               avgMult=avgMult)
     
     # aligning signals to peak
     # aligning to 1e-9 seconds by default.

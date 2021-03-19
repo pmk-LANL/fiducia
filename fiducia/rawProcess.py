@@ -679,7 +679,7 @@ def polyBkg(time,
             plot=False):
     r"""
     Fit polynomial function to ends of the signal as an estimate of the
-    background signal + hyesteresis. Default is cubic fit.
+    background signal + hysteresis. Default is cubic fit.
     
     Parameters
     ----------
@@ -860,10 +860,10 @@ def signalEdges(timesFrame,
                        ymin=signal[peaks] - properties["prominences"],
                        ymax = signal[peaks],
                        color = "C1")
-            plt.hlines(y=properties["width_heights"],
-                       xmin=times[properties["left_ips"]],
-                       xmax=times[properties["right_ips"]],
-                       color = "C1")
+            # plt.hlines(y=properties["width_heights"],
+            #            xmin=times[properties["left_ips"]],
+            #            xmax=times[properties["right_ips"]],
+            #            color = "C1")
             plt.hlines(y=avgMult * np.mean(signal),
                        xmin=times[0],
                        xmax=times[len(signal) - 1],
@@ -997,7 +997,7 @@ def highestPeak(signal, peakIdxs):
     return peakHighestIdx, peakIdxs2 
 
 
-def highestN(signal, peakIdxs, peaksNum=2):
+def highestN(signal, peakIdxs, peaksNum=1):
     r"""
     Select the N tallest peaks.
     
@@ -1031,7 +1031,8 @@ def highestN(signal, peakIdxs, peaksNum=2):
     """
     if peaksNum > len(peakIdxs):
         raise Exception("Number of peaks to grab should be less than or "
-                        "equal to total number of peaks provided!")
+                        "equal to total number of peaks provided! Got "
+                        f"{len(peakIdxs)} peaks and {peaksNum} to grab.")
     # initialize input to find highest peak first time around
     peakIdxsInput = peakIdxs
     # initialize array containing highest peaks
@@ -1052,7 +1053,7 @@ def highestN(signal, peakIdxs, peaksNum=2):
 def getPeaks(timesFrame,
              df,
              channels,
-             peaksNum=2,
+             peaksNum=1,
              plot=False,
              prominence=0.1,
              width=10,
@@ -1075,9 +1076,6 @@ def getPeaks(timesFrame,
         Number of peaks to grab from peakIdxs. This function will grab
         just the N tallest peaks where N=peaksNum.
     
-    peaksNum: int
-        Number of peaks to grab from peakIdxs. This function will grab
-        just the N tallest peaks where N=peaksNum.
         
     plot: bool
         Flag for plotting identified peaks, with prominences, and widths,
@@ -1124,6 +1122,15 @@ def getPeaks(timesFrame,
                                        height=avgMult * np.mean(signal),
                                        prominence=prominence,
                                        width=width)
+        if len(peaks) == 0:
+            plt.plot(times, signal)
+            plt.title(f"Ch {ch} Failed getPeaks()")
+            plt.xlabel("Time (s)")
+            plt.ylabel("Signal (V)")
+            plt.show()
+            raise Exception(f"Could not find any peaks for ch {ch} in getPeaks().")
+            
+        
         # selecting the N tallest peaks
         highestPeakIdxs = highestN(signal=signal,
                                    peakIdxs=peaks,
@@ -1140,10 +1147,10 @@ def getPeaks(timesFrame,
                        ymin=signal[peaks] - properties["prominences"],
                        ymax = signal[peaks],
                        color = "C1")
-            plt.hlines(y=properties["width_heights"],
-                       xmin=times[properties["left_ips"]],
-                       xmax=times[properties["right_ips"]],
-                       color = "C1")
+            # plt.hlines(y=properties["width_heights"],
+            #            xmin=properties["left_ips"],
+            #            xmax=properties["right_ips"],
+            #            color = "C1")
             plt.hlines(y=avgMult * np.mean(signal),
                        xmin=times[0],
                        xmax=times[len(signal) - 1],
