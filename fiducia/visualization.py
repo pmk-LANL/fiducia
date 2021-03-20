@@ -182,7 +182,7 @@ def uniformStreak(times, energies, spectra):
     return energiesNew, spectraNew
 
 
-def plotStreak(times, energies, spectra):
+def plotStreak(times, energies, spectra, showFlag=True):
     r"""
     Plot streak of unfolded Dante spectra. See analyzeStreak().
     
@@ -223,7 +223,8 @@ def plotStreak(times, energies, spectra):
     plt.xlabel('Photon Energy (eV)')
     cbar = plt.colorbar()
     cbar.set_label("Spectrum (GW/sr/eV)")
-    plt.show()
+    if showFlag:
+        plt.show()
     return
 
 
