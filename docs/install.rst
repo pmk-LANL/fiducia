@@ -17,6 +17,7 @@ Fiducia also require the following openly available packages for installation:
 - `matplotlib <https://matplotlib.org/>`_ — 3.0.0 or newer
 - `xarray <http://xarray.pydata.org>`_ — 0.15.1 or newer
 - `Astropy <https://www.astropy.org/>`_ — 3.1 or newer
+- `xlrd <https://github.com/python-excel/xlrd/>`_ — 1.2.0 or newer
 
 
 Installation with pip
