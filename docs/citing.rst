@@ -12,7 +12,7 @@ acknowledgement:
 
 and that you cite the following paper(s):
 
-.. code-block:: bib
+.. code-block:: latex
 
    @article{barnak2020soft,
      title={Soft x-ray spectrum unfold of K-edge filtered x-ray diode arrays using cubic splines},
