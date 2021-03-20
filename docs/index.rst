@@ -37,6 +37,7 @@ analysis using Fiducia.
    response
    stats
    visualization
+   data
  
 
 .. _toplevel-development-guide:
