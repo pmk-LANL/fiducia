@@ -439,7 +439,8 @@ def analyzeStreak(channels,
                   yGuess=0,
                   boundary="y0",
                   nPtsIntegral=100,
-                  nPtsSpectrum=100):
+                  nPtsSpectrum=100,
+                  plotsFlag=False):
     r"""
     Given the response function file and the DANTE measurement data file,
     run cubic spline analysis to reconstruct spectrum for a given time.
@@ -559,17 +560,20 @@ def analyzeStreak(channels,
                                   boundary=boundary,
                                   nPtsIntegral=100,
                                   nPtsSpectrum=100,
-                                  plotKnots=False,
-                                  plotSpectrum=False)
+                                  plotKnots=plotsFlag,
+                                  plotSpectrum=plotsFlag,
+                                  plotSignal=plotsFlag)
         knotsYAll, knotsYVariance, photonEnergies, intensities, intensitiesVariance = results
         # including unfolding spectrum for time step into array of spectra
         # for all time steps
         energies[:, idt] = photonEnergies
         spectra[:, idt] = intensities
         spectraVariance[:, idt] = intensitiesVariance
-        print(f"Completed time step {time:.2f} ns.")    
-    # plotting streaked spectrum
-    plotStreak(times, energies, spectra)
+        print(f"Completed time step {time:.2f} ns.") 
+    
+    if plotsFlag:
+        # plotting streaked spectrum
+        plotStreak(times, energies, spectra)
     return times, energies, spectra, spectraVariance
 
 
@@ -589,7 +593,8 @@ def feelingLucky(dataFile,
                  avgMult=1.5,
                  timeStart=-1,
                  timeStop=4,
-                 timeStep=0.1):
+                 timeStep=0.1,
+                 plotsFlag=False):
     r"""
     Attempt processing dante signals given dante data file and calibration
     files using sensible defaults.
@@ -663,7 +668,7 @@ def feelingLucky(dataFile,
     timesFrame, dfAtten, onChList, hf, dfVolt = loadCorrected(danteFile=dataFile,
                                                               attenuatorsFile=attenuatorsFile,
                                                               offsetsFile=offsetsFile,
-                                                              plot=True)
+                                                              plot=plotsFlag)
     
     # removing hysteresis and background with a polynomial fit
     dfPoly = hysteresisCorrect(timesFrame=timesFrame,
@@ -672,7 +677,8 @@ def feelingLucky(dataFile,
                                order=5,
                                prominence=prominence,
                                width=peakWidth,
-                               avgMult=avgMult)
+                               avgMult=avgMult,
+                               plotsFlag=plotsFlag)
     
     # aligning signals to peak
     # aligning to 1e-9 seconds by default.
@@ -685,7 +691,8 @@ def feelingLucky(dataFile,
                          referenceTime=1e-9,
                          prominence=prominence,
                          width=peakWidth,
-                         avgMult=avgMult)
+                         avgMult=avgMult,
+                         plotsFlag=plotsFlag)
     
     # constructing dataframe for passing to analyzeStreak()
     measurementFrame = constructMeasurementFrame(timesFrame=timesAligned,
@@ -693,7 +700,8 @@ def feelingLucky(dataFile,
                                                  channels=channels)
         
     # testing plot traces
-    plotTraces(channels, measurementFrame, scale='log')
+    if plotsFlag:
+        plotTraces(channels, measurementFrame, scale='log')
     
     # loading dante responses
     responseFrame = loadResponses(channels, responseFile)
@@ -731,7 +739,9 @@ def feelingLucky(dataFile,
                                       time=time,
                                       yGuess=0,
                                       boundary=boundary,
-                                      plotKnots=True)
+                                      plotKnots=plotsFlag,
+                                      plotSpectrum=plotsFlag,
+                                      plotSignal=plotsFlag)
     knotsYAll, knotsYVariance, photonEnergies, intensities, intensitiesVariance = spectrumResults
     
     # unfolding time resolved spectra
@@ -754,32 +764,36 @@ def feelingLucky(dataFile,
                                   nPtsSpectrum=100)
     times, energies, spectra, spectraVariance = streakResults
 
-
     spectraUncertainty = np.sqrt(spectraVariance)
     power, powerVariance = inferPower(energies, spectra, spectraUncertainty)
-    plt.scatter(times, power)
-    plt.xlabel("Time (ns)")
-    plt.ylabel("Radiated Power (GW/sr)")
-    plt.show()
     powerUncertainty = np.sqrt(powerVariance)
-    fiducia.pltDefaults.plot_line_shaded(times, power, powerUncertainty)
-    plt.xlabel("Time (ns)")
-    plt.ylabel("Radiated Power (GW/sr)")
-    axes = plt.gca()
-    axes.set_ylim([0,None])
-    plt.show()
-    
     tRad, tRadVariance = inferRadTemp(power, area, angle, powerUncertainty)
-    plt.scatter(times, tRad)
-    plt.xlabel("Time (ns)")
-    plt.ylabel("Radiation Temperature (eV)")
-    plt.show()
     tRadUncertainty = np.sqrt(tRadVariance)
-    fiducia.pltDefaults.plot_line_shaded(times, tRad, tRadUncertainty)
-    plt.xlabel("Time (ns)")
-    plt.ylabel("Radiation Temperature (eV)")
-    axes = plt.gca()
-    axes.set_ylim([0,None])
-    plt.show()
-#    return None
+    
+    if plotsFlag:
+        plt.scatter(times, power)
+        plt.xlabel("Time (ns)")
+        plt.ylabel("Radiated Power (GW/sr)")
+        plt.show()
+    
+        fiducia.pltDefaults.plot_line_shaded(times, power, powerUncertainty)
+        plt.xlabel("Time (ns)")
+        plt.ylabel("Radiated Power (GW/sr)")
+        axes = plt.gca()
+        axes.set_ylim([0,None])
+        plt.show()
+        
+        
+        plt.scatter(times, tRad)
+        plt.xlabel("Time (ns)")
+        plt.ylabel("Radiation Temperature (eV)")
+        plt.show()
+        
+        fiducia.pltDefaults.plot_line_shaded(times, tRad, tRadUncertainty)
+        plt.xlabel("Time (ns)")
+        plt.ylabel("Radiation Temperature (eV)")
+        axes = plt.gca()
+        axes.set_ylim([0,None])
+        plt.show()
+
     return times, energies, spectra, power, tRad

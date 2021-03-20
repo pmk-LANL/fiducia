@@ -1473,7 +1473,8 @@ def hysteresisCorrect(timesFrame,
                       order=5,
                       prominence=0.2,
                       width=10,
-                      avgMult=1):
+                      avgMult=1,
+                      plotsFlag=False):
     r"""
     Corrects for hysteresis by detecting edges of signal containing region
     and fitting a polynomial background to regions that do not belong to 
@@ -1525,7 +1526,7 @@ def hysteresisCorrect(timesFrame,
     edgesFrame = signalEdges(timesFrame=timesFrame,
                              df=df,
                              channels=channels,
-                             plot=False,
+                             plot=plotsFlag,
                              prominence=prominence,
                              width=width,
                              avgMult=avgMult)
@@ -1536,7 +1537,7 @@ def hysteresisCorrect(timesFrame,
                           edgesFrame=edgesFrame,
                           channels=channels,
                           order=order,
-                          plot=False)
+                          plot=plotsFlag)
     return dfPoly
 
 
@@ -1548,7 +1549,8 @@ def align(timesFrame,
           referenceTime=1e-9,
           prominence=0.01,
           width=10,
-          avgMult=1.5):
+          avgMult=1.5,
+          plotsFlag=False):
     r"""
     Aligns dante signals based on peak finding.
     
@@ -1609,7 +1611,7 @@ def align(timesFrame,
                           df=df,
                           channels=channels,
                           peaksNum=peaksNum,
-                          plot=True,
+                          plot=plotsFlag,
                           prominence=prominence,
                           width=width,
                           avgMult=avgMult)
@@ -1621,7 +1623,7 @@ def align(timesFrame,
                               channels=channels,
                               peakAlignIdx=peakAlignIdx,
                               referenceTime=referenceTime,
-                              plot=True)
+                              plot=plotsFlag)
     return timesAligned
 
 #-----------------------------------------
