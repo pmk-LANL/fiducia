@@ -68,5 +68,6 @@ def shot89336():
                 'Response Uncertainty' : responseUncertaintyFileAbs,
                 'Oscilloscope Offsets' : offsetsFileAbs,
                 'Attenuators' : attenuatorsFileAbs,
-                'MC Uncertainties' : csplineDatasetFileAbs}
+                'MC Uncertainties' : csplineDatasetFileAbs,
+                'LA-UR': 'LA-UR-21-22787'}
     return dataDict
